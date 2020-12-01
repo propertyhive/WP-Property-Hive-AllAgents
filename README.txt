@@ -1,4 +1,4 @@
-=== Property Hive AllAgents ===
+=== Property Hive AllAgents Review Embed ===
 Contributors: PropertyHive,BIOSTALL
 Tags: propertyhive, property hive, property, real estate, software, estate agents, estate agent, allagents, all agents
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=N68UHATHAEDLN&lc=GB&item_name=BIOSTALL&no_note=0&cn=Add%20special%20instructions%20to%20the%20seller%3a&no_shipping=1&currency_code=GBP&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted
@@ -8,7 +8,7 @@ Stable tag: 1.0.0
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
-Quickly and easily display ratings and reviews from AllAgents
+Quickly and easily display ratings and reviews from AllAgents, plus customisation options
 
 == Description ==
 
@@ -37,6 +37,10 @@ Updating should work like a charm; as always though, ensure you backup your site
 = The Shortcode =
 
 Simply add the shortcode [allagents id="X"] where you want it to appear. Visit the setting area to get the full shortcode.
+
+= Disclaimer =
+
+This plugin is in no way associated with AllAgents and all output is achieved through use of their available widgets and API
 
 == Screenshots ==
 

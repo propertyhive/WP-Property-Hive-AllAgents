@@ -1,8 +1,8 @@
 <?php
 /**
- * Plugin Name: Property Hive AllAgents
+ * Plugin Name: Property Hive AllAgents Review Embed
  * Plugin Uri: http://wp-property-hive.com/addons/allagents/
- * Description: Quickly and easily display ratings and reviews from AllAgents
+ * Description: Quickly and easily display ratings and reviews from AllAgents, plus customisation options
  * Version: 1.0.0
  * Author: PropertyHive
  * Author URI: http://wp-property-hive.com
@@ -68,7 +68,7 @@ final class PH_AllAgents {
         else
         {
             // Property Hive is not active. Display as normal settings page
-
+            add_action( 'admin_menu', array( $this, 'add_settings_page' ) );
         }
 
         add_action( 'phallagentscronhook', array( $this, 'cache_reviews' ) );
@@ -94,19 +94,222 @@ final class PH_AllAgents {
         include_once( dirname( __FILE__ ) . "/includes/class-ph-allagents-install.php" );
     }
 
+    public function add_settings_page()
+    {
+        add_options_page( 'AllAgents', 'AllAgents', 'manage_options', 'allagents', array( $this, 'render_plugin_settings_page' ) );
+    }
+
+    public function render_plugin_settings_page()
+    {
+        global $current_section;
+
+        $current_section = isset($_GET['section']) ? $_GET['section'] : '';
+
+        if ( ! empty( $_POST ) )
+        {
+            $this->save_rendered_settings();
+            $current_section = '';
+        }
+
+?>
+<div class="wrap">
+    <h1>AllAgents Settings</h1>
+
+    <?php
+        switch ( $current_section )
+        {
+            case "addwidget":
+            {
+                $this->render_settings();
+                break;
+            }
+            case "editwidget":
+            {
+                $this->render_settings();
+                break;
+            }
+            default:
+            {
+    ?>
+    <table cellpadding="5" cellspacing="0" width="98%">
+        <?php
+            $this->allagents_widgets(false);
+        ?>
+    </table>
+    <?php
+            }
+        }
+    ?>
+</div>
+<?php
+    }
+
+    private function render_settings()
+    {
+        $settings = $this->get_widget_settings();
+
+        $current_id = isset($_GET['id']) ? (int)$_GET['id'] : '';
+
+        $widget_details = array();
+
+        $current_allagents_options = get_option( 'propertyhive_allagents' );
+
+        $widgets = isset($current_allagents_options['widgets']) ? $current_allagents_options['widgets'] : array();
+        $num_widgets = count($widgets);
+
+        if ($current_id != '')
+        {
+            // We're editing one
+            if (isset($widgets[$current_id]))
+            {
+                $widget_details = $widgets[$current_id];
+            }
+        }
+
+        echo '<form action="" method="post"><table class="form-table">';
+                
+        foreach ( $settings as $setting )
+        {
+            $description = $setting['desc'];
+
+            switch ($setting['type'])
+            {
+                case "text":
+                case "number":
+                case "color":
+                {
+                    echo '
+                    <tr valign="top" id="row_' . esc_attr($setting['id']) . '">
+                        <th scope="row" class="titledesc">
+                            <label for="' . esc_attr($setting['id']) . '">' . $setting['title'] . '</label>
+                        </th>
+                        <td class="forminp forminp-text">
+                            <input
+                                name="' . esc_attr($setting['id']) . '"
+                                id="' . esc_attr($setting['id']) . '"
+                                type="' . esc_attr($setting['type']) . '"
+                                value="' . esc_attr($setting['default']) . '"
+                            />
+                            ' . $description . '
+                        </td>
+                    </tr>';
+                    break;
+                }
+                case "textarea":
+                {
+                    echo '
+                    <tr valign="top" id="row_' . esc_attr($setting['id']) . '">
+                        <th scope="row" class="titledesc">
+                            <label for="' . esc_attr($setting['id']) . '">' . $setting['title'] . '</label>
+                        </th>
+                        <td class="forminp forminp-text">
+                            <textarea
+                                style="width:100%; max-width:480px; height:105px;"
+                                name="' . esc_attr($setting['id']) . '"
+                                id="' . esc_attr($setting['id']) . '"
+                                type="' . esc_attr($setting['type']) . '">' . $setting['default'] . '</textarea>
+                        </td>
+                    </tr>';
+                    break;
+                }
+                case "radio":
+                {
+                    echo '
+                    <tr valign="top" id="row_' . esc_attr($setting['id']) . '">
+                        <th scope="row" class="titledesc">
+                            <label for="' . esc_attr($setting['id']) . '">' . $setting['title'] . '</label>
+                        </th>
+                        <td class="forminp forminp-text">
+                            <fieldset>
+                                ' . $description . '
+                                <ul>';
+                                    foreach ( $setting['options'] as $key => $val ) {
+                                        ?>
+                                        <li>
+                                            <label><input
+                                                name="<?php echo esc_attr( $setting['id'] ); ?>"
+                                                value="<?php echo $key; ?>"
+                                                type="radio"
+                                                <?php checked( $key, $setting['default'] ); ?>
+                                                /> <?php echo $val ?></label>
+                                        </li>
+                                        <?php
+                                    }
+                                echo '</ul>
+                            </fieldset>
+                        </td>
+                    </tr>';
+                    break;
+                }
+                case "checkbox":
+                {
+                    echo '
+                    <tr valign="top" id="row_' . esc_attr($setting['id']) . '">
+                        <th scope="row" class="titledesc">
+                            <label for="' . esc_attr($setting['id']) . '">' . $setting['title'] . '</label>
+                        </th>
+                        <td class="forminp forminp-text">
+                            <label for="' . esc_attr($setting['id']) . '">
+                            <input
+                                name="' . esc_attr($setting['id']) . '"
+                                id="' . esc_attr($setting['id']) . '"
+                                type="checkbox"
+                                value="1"
+                                ' . checked( $setting['default'], 'yes', false) . '
+                            /> ' . $description . '
+                        </label>
+                        </td>
+                    </tr>';
+                    break;
+                }
+                case "html":
+                {
+                    echo $setting['html'];
+                    break;
+                }
+                case "title":
+                case "sectionend":
+                {
+
+                    break;
+                }
+                default: 
+                {
+                    echo 'unknown setting type ' . $setting['type'];
+                }
+            }
+        }
+
+        echo '</table>
+
+        ' . wp_nonce_field('propertyhive-settings') . '
+        <input name="save" class="button-primary" type="submit" value="' . __( 'Save changes', 'propertyhive' ) . '">
+        <a class="button" href="' . admin_url('options-general.php?page=allagents') . '">' . __( 'Cancel', 'propertyhive' ) . '</a>
+
+        </form>';
+    }
+
+    private function save_rendered_settings()
+    {
+        if ( empty( $_REQUEST['_wpnonce'] ) || ! wp_verify_nonce( $_REQUEST['_wpnonce'], 'propertyhive-settings' ) )
+                die( __( 'Action failed. Please refresh the page and retry.', 'propertyhive' ) );
+
+        $this->save();
+    }
+
     public function plugin_add_settings_link( $links )
     {
         if ( is_plugin_active( 'propertyhive/propertyhive.php' ) )
         {
             // Property Hive is active
             $settings_link = '<a href="' . admin_url('admin.php?page=ph-settings&tab=allagents') . '">' . __( 'Settings' ) . '</a>';
-            array_push( $links, $settings_link );
         }
         else
         {
             // Property Hive is not active
-
+            $settings_link = '<a href="' . admin_url('options-general.php?page=allagents') . '">' . __( 'Settings' ) . '</a>';
         }
+        array_push( $links, $settings_link );
         return $links;
     }
 
@@ -186,7 +389,7 @@ final class PH_AllAgents {
      * @access public
      * @return void
      */
-    public function allagents_widgets() {
+    public function allagents_widgets( $property_hive_active = true ) {
         global $wpdb, $post;
         
         ?>
@@ -195,7 +398,7 @@ final class PH_AllAgents {
                 &nbsp;
             </th>
             <td class="forminp forminp-button">
-                <a href="<?php echo admin_url( 'admin.php?page=ph-settings&tab=allagents&section=addwidget' ); ?>" class="button alignright"><?php echo __( 'Add New Widget', 'propertyhive' ); ?></a>
+                <a href="<?php echo $property_hive_active ? admin_url( 'admin.php?page=ph-settings&tab=allagents&section=addwidget' ) : admin_url( 'options-general.php?page=allagents&section=addwidget' ); ?>" class="button alignright"><?php echo __( 'Add New Widget', 'propertyhive' ); ?></a>
             </td>
         </tr>
         <tr valign="top">
@@ -232,7 +435,7 @@ final class PH_AllAgents {
                                         echo '<td class="name">' . $widget['name'] . '</td>';
                                         echo '<td class="shortcode"><code>[allagents id="' . ($i + 1) . '"]</code></td>';
                                         echo '<td class="settings">
-                                            <a class="button" href="' . admin_url( 'admin.php?page=ph-settings&tab=allagents&section=editwidget&id=' . $i ) . '">' . __( 'Edit', 'propertyhive' ) . '</a>
+                                            <a class="button" href="' . ( $property_hive_active ? admin_url( 'admin.php?page=ph-settings&tab=allagents&section=editwidget&id=' . $i ) : admin_url( 'options-general.php?page=allagents&section=editwidget&id=' . $i ) ) . '">' . __( 'Edit', 'propertyhive' ) . '</a>
                                         </td>';
                                     echo '</tr>';
                                 }
@@ -253,7 +456,7 @@ final class PH_AllAgents {
                 &nbsp;
             </th>
             <td class="forminp forminp-button">
-                <a href="<?php echo admin_url( 'admin.php?page=ph-settings&tab=allagents&section=addwidget' ); ?>" class="button alignright"><?php echo __( 'Add New Widget', 'propertyhive' ); ?></a>
+                <a href="<?php echo $property_hive_active ? admin_url( 'admin.php?page=ph-settings&tab=allagents&section=addwidget' ) : admin_url( 'options-general.php?page=allagents&section=addwidget' ); ?>" class="button alignright"><?php echo __( 'Add New Widget', 'propertyhive' ); ?></a>
             </td>
         </tr>
         <?php
@@ -443,7 +646,6 @@ final class PH_AllAgents {
                 }
             </script>'
         );
-
             
         $settings[] = array( 'type' => 'sectionend', 'id' => 'widget_settings');
 
@@ -496,7 +698,8 @@ final class PH_AllAgents {
 
                 update_option( 'propertyhive_allagents', $new_allagents_options );
 
-                PH_Admin_Settings::add_message( __( 'Widget added successfully', 'propertyhive' ) . ' ' . '<a href="' . admin_url( 'admin.php?page=ph-settings&tab=allagents' ) . '">' . __( 'Return to AllAgents Options', 'propertyhive' ) . '</a>' );
+                if ( is_plugin_active( 'propertyhive/propertyhive.php' ) ) { PH_Admin_Settings::add_message( __( 'Widget added successfully', 'propertyhive' ) . ' ' . '<a href="' . admin_url( 'admin.php?page=ph-settings&tab=allagents' ) . '">' . __( 'Return to AllAgents Options', 'propertyhive' ) . '</a>' ); }
+                
                 break;
             }
             case 'editwidget': 
@@ -525,7 +728,7 @@ final class PH_AllAgents {
 
                 update_option( 'propertyhive_allagents', $new_allagents_options );
                         
-                PH_Admin_Settings::add_message( __( 'Widget details updated successfully', 'propertyhive' ) . ' ' . '<a href="' . admin_url( 'admin.php?page=ph-settings&tab=allagents' ) . '">' . __( 'Return to AllAgents Options', 'propertyhive' ) . '</a>' );
+                if ( is_plugin_active( 'propertyhive/propertyhive.php' ) ) { PH_Admin_Settings::add_message( __( 'Widget details updated successfully', 'propertyhive' ) . ' ' . '<a href="' . admin_url( 'admin.php?page=ph-settings&tab=allagents' ) . '">' . __( 'Return to AllAgents Options', 'propertyhive' ) . '</a>' ); }
                 
                 break;
             }
