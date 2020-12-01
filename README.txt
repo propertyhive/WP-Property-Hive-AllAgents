@@ -14,7 +14,7 @@ Quickly and easily display ratings and reviews from AllAgents
 
 This plugin, from the creators of [Property Hive](https://wordpress.org/plugins/propertyhive/), allows you to quickly and easily display ratings and reviews from AllAgents on your website by simply adding the shortcode [allagents] where you want them to appear.
 
-Use pre-built widgets provided by AllAgents or we can integrate with their API whereby you can choose and customise the layout.
+Use pre-built widgets provided by AllAgents or we can integrate with their API whereby you can choose and customise the layout, including option to change colours and display the reviews as a list or in a carousel.
 
 Note: This plugin is independent of Property Hive. You DO NOT need to be using Property Hive to download and use this plugin.
 
@@ -36,13 +36,14 @@ Updating should work like a charm; as always though, ensure you backup your site
 
 = The Shortcode =
 
-Simply add the shortcode [allagents] where you want it to appear.
+Simply add the shortcode [allagents id="X"] where you want it to appear. Visit the setting area to get the full shortcode.
 
 == Screenshots ==
 
 1. Once you've added the [allagents] shortcode the AllAgents reviews and rating begin to appear
 2. Settings allow you to choose if you want to use pre-built widgets provided by AllAgents
 3. Alternatively we can integrate with their API whereby you can choose and customise the layout
+4. Reviews output in a list or carousel
 
 == Changelog ==
 

@@ -1,0 +1,22 @@
+.allagents-widget {  }
+
+.allagents-header { background:#0d47a1; color:#FFF; padding:20px; }
+.allagents-header .allagents-logo { float:right; }
+.allagents-header .allagents-stars { font-size:0.9em; }
+.allagents-header .allagents-stars > span { display:inline-block; font-size:2em; vertical-align:middle; color:#FFD300; margin-right:3px; }
+
+.allagents-reviews {  }
+.allagents-reviews .slick-prev,
+.allagents-reviews .slick-next { cursor:pointer; position:absolute; z-index:99; font-size:3em; top:50%; margin-top:-22px; line-height:1; }
+.allagents-reviews .slick-prev { left:0; }
+.allagents-reviews .slick-next { right:0; }
+.allagents-reviews .allagents-review { padding:20px; border-bottom:1px solid #CCC; }
+.allagents-reviews.slick-slider .allagents-review { padding-left:40px; padding-right:40px; border:0; }
+.allagents-reviews .allagents-review .allagents-stars { float:right; font-size:0.9em; line-height:1; }
+.allagents-reviews .allagents-stars > span { display:inline-block; font-size:2em; vertical-align:middle; color:#FFD300; margin-right:3px; }
+.allagents-reviews .allagents-date { color:#999; font-size:0.8em; }
+.allagents-reviews .allagents-reviewer { font-weight:700; }
+.allagents-reviews .allagents-quote {  }
+
+.allagents-footer { text-align:center; padding:20px; }
+.allagents-footer a { display:inline-block; background:#0d47a1; color:#FFF; text-decoration:none; padding:7px 20px; }

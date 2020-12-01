@@ -101,7 +101,7 @@ class PH_AllAgents_Install {
         wp_clear_scheduled_hook('phallagentscronhook');
         
         $next_schedule = time() - 60;
-        wp_schedule_event( $next_schedule, 'hourly', 'phallagentscronhook' );
+        wp_schedule_event( $next_schedule, 'daily', 'phallagentscronhook' );
 
     }
 

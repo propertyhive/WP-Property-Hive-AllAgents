@@ -73,8 +73,8 @@ final class PH_AllAgents {
 
         add_action( 'phallagentscronhook', array( $this, 'cache_reviews' ) );
 
-        //add_action( 'wp_enqueue_scripts', array( $this, 'load_allagents_scripts' ) );
-        //add_action( 'wp_enqueue_scripts', array( $this, 'load_allagents_styles' ) );
+        add_action( 'wp_enqueue_scripts', array( $this, 'load_allagents_scripts' ) );
+        add_action( 'wp_enqueue_scripts', array( $this, 'load_allagents_styles' ) );
 
         add_shortcode( 'allagents', array( $this, 'propertyhive_allagents_shortcode' ) );
     }
@@ -112,77 +112,7 @@ final class PH_AllAgents {
 
     public function cache_reviews()
     {
-        $current_settings = get_option( 'propertyhive_allagents', array() );
-
-        $widgets = isset($current_settings['widgets']) ? $current_settings['widgets'] : array();
-
-        if ( is_array($widgets) && !empty($widgets) )
-        {
-            foreach ( $widgets as $i => $widget )
-            {
-                if (
-                    isset($widget['integration_type']) && $widget['integration_type'] == 'api' &&
-                    isset($widget['api_key']) && trim($widget['api_key']) != '' 
-                )
-                {
-                    $overall = array();
-                    $reviews = array();
-
-                    // Overall
-                    $response = wp_remote_get(
-                        'https://www.allagents.co.uk/api/v1/firms/[your-firm-link]/',
-                        array(
-                            'headers' => array(
-                                'APIKEY' => $widget['api_key'],
-                            ),
-                            'timeout' => 30
-                        )
-                    );
-
-                    if ( is_array( $response ) && !is_wp_error( $response ) ) 
-                    {
-                        $headers = $response['headers']; // array of http header lines
-                        $body = $response['body']; // use the content
-
-                        $body = json_decode($body);
-
-                        if ( $body !== FALSE )
-                        {
-                            $overall = $body;
-                        }
-                    }
-
-                    // Reviews
-                    $response = wp_remote_get(
-                        'https://www.allagents.co.uk/api/v1/firms/[your-firm-link]/reviews/',
-                        array(
-                            'headers' => array(
-                                'APIKEY' => $widget['api_key'],
-                            ),
-                            'timeout' => 30
-                        )
-                    );
-
-                    if ( is_array( $response ) && !is_wp_error( $response ) ) 
-                    {
-                        $headers = $response['headers']; // array of http header lines
-                        $body = $response['body']; // use the content
-
-                        $body = json_decode($body);
-
-                        if ( $body !== FALSE )
-                        {
-                            $reviews = $body;
-                        }
-                    }
-
-                    $current_settings['widgets'][$i]['overall'] = $overall;
-                    $current_settings['widgets'][$i]['reviews'] = $reviews;
-                }
-            }
-        }
-
-        update_option( 'propertyhive_allagents', $current_settings );
+        require( __DIR__ . '/cron.php' );
     }
 
     /**
@@ -342,17 +272,18 @@ final class PH_AllAgents {
 
         $widget_details = array();
 
+        $current_allagents_options = get_option( 'propertyhive_allagents' );
+
+        $widgets = isset($current_allagents_options['widgets']) ? $current_allagents_options['widgets'] : array();
+        $num_widgets = count($widgets);
+
         if ($current_id != '')
         {
             // We're editing one
 
-            $current_allagents_options = get_option( 'propertyhive_allagents' );
-
-            $wigdets = $current_allagents_options['widgets'];
-
-            if (isset($wigdets[$current_id]))
+            if (isset($widgets[$current_id]))
             {
-                $widget_details = $wigdets[$current_id];
+                $widget_details = $widgets[$current_id];
             }
         }
 
@@ -364,7 +295,7 @@ final class PH_AllAgents {
             'title'     => __( 'Name', 'propertyhive' ),
             'id'        => 'name',
             'type'      => 'text',
-            'default'   => isset($widget_details['name']) && $widget_details['name'] != '' ? $widget_details['name'] : 'AllAgents Widget',
+            'default'   => isset($widget_details['name']) && $widget_details['name'] != '' ? $widget_details['name'] : 'AllAgents Widget ' . ($num_widgets+1),
             'desc'      => __( 'If creating multiple widgets (i.e. one per branch) this allows you to differentiate between them', 'propertyhive' )
         );
 
@@ -422,6 +353,45 @@ final class PH_AllAgents {
         );
 
         $settings[] = array(
+            'title'     => __( 'Display', 'propertyhive' ),
+            'id'        => 'display',
+            'type'      => 'radio',
+            'default'   => ( isset($widget_details['display']) && in_array($widget_details['display'], array('list', 'carousel')) ? $widget_details['display'] : 'list'),
+            'options'   => array(
+                'list' => 'List',
+                'carousel' => 'Carousel',
+            ),
+        );
+
+        $settings[] = array(
+            'title'     => __( 'Number Of Reviews Displayed', 'propertyhive' ),
+            'id'        => 'number_reviews',
+            'type'      => 'number',
+            'default'   => isset($widget_details['number_reviews'])? $widget_details['number_reviews'] : '20',
+        );
+
+        $settings[] = array(
+            'title'     => __( 'Show Header', 'propertyhive' ),
+            'id'        => 'display_header',
+            'type'      => 'checkbox',
+            'default'   => ( !isset($widget_details['display_header']) || ( isset($widget_details['display_header']) && $widget_details['display_header'] == 1 ) ? 'yes' : ''),
+        );
+
+        $settings[] = array(
+            'title'     => __( 'Header Background Colour', 'propertyhive' ),
+            'id'        => 'header_background_colour',
+            'type'      => 'color',
+            'default'   => isset($widget_details['color'])? $widget_details['color'] : '#0d47a1',
+        );
+
+        $settings[] = array(
+            'title'     => __( 'Show Footer', 'propertyhive' ),
+            'id'        => 'display_footer',
+            'type'      => 'checkbox',
+            'default'   => ( !isset($widget_details['display_footer']) || ( isset($widget_details['display_footer']) && $widget_details['display_footer'] == 1 ) ? 'yes' : ''),
+        );
+
+        $settings[] = array(
             'id'        => 'custom_js',
             'type'      => 'html',
             'html'      => '<script>
@@ -440,7 +410,13 @@ final class PH_AllAgents {
                     jQuery(\'#row_widget_code\').hide();
                     jQuery(\'#row_api_key\').hide();
                     jQuery(\'#row_show_reviews_for\').hide();
+                    jQuery(\'#row_firm_link\').hide();
                     jQuery(\'#row_branch_link\').hide();
+                    jQuery(\'#row_display\').hide();
+                    jQuery(\'#row_number_reviews\').hide();
+                    jQuery(\'#row_display_header\').hide();
+                    jQuery(\'#row_header_background_colour\').hide();
+                    jQuery(\'#row_display_footer\').hide();
 
                     if ( selected_val == \'widget\' )
                     {
@@ -450,6 +426,12 @@ final class PH_AllAgents {
                     {
                         jQuery(\'#row_api_key\').show();
                         jQuery(\'#row_show_reviews_for\').show();
+                        jQuery(\'#row_firm_link\').show();
+                        jQuery(\'#row_display\').show();
+                        jQuery(\'#row_display_header\').show();
+                        jQuery(\'#row_number_reviews\').show();
+                        jQuery(\'#row_header_background_colour\').show();
+                        jQuery(\'#row_display_footer\').show();
 
                         var selected_val = jQuery(\'input[name=show_reviews_for][type=radio]:checked\').val();
 
@@ -503,6 +485,11 @@ final class PH_AllAgents {
                     'show_reviews_for' => isset($_POST['show_reviews_for']) && in_array($_POST['show_reviews_for'], array('firm', 'branch')) ? sanitize_text_field($_POST['show_reviews_for']) : 'firm',
                     'firm_link' => sanitize_text_field($_POST['firm_link']),
                     'branch_link' => sanitize_text_field($_POST['branch_link']),
+                    'number_reviews' => (int)$_POST['number_reviews'],
+                    'display' => isset($_POST['display']) && in_array($_POST['display'], array('list', 'carousel')) ? sanitize_text_field($_POST['display']) : 'list',
+                    'display_header' => isset($_POST['display_header']) ? sanitize_text_field($_POST['display_header']) : '',
+                    'header_background_colour' => sanitize_text_field($_POST['header_background_colour']),
+                    'display_footer' => isset($_POST['display_footer']) ? sanitize_text_field($_POST['display_footer']) : '',
                 );
 
                 $new_allagents_options['widgets'][] = $widget;
@@ -527,6 +514,11 @@ final class PH_AllAgents {
                     'show_reviews_for' => isset($_POST['show_reviews_for']) && in_array($_POST['show_reviews_for'], array('firm', 'branch')) ? sanitize_text_field($_POST['show_reviews_for']) : 'firm',
                     'firm_link' => sanitize_text_field($_POST['firm_link']),
                     'branch_link' => sanitize_text_field($_POST['branch_link']),
+                    'number_reviews' => (int)$_POST['number_reviews'],
+                    'display' => isset($_POST['display']) && in_array($_POST['display'], array('list', 'carousel')) ? sanitize_text_field($_POST['display']) : 'list',
+                    'display_header' => isset($_POST['display_header']) ? sanitize_text_field($_POST['display_header']) : '',
+                    'header_background_colour' => sanitize_text_field($_POST['header_background_colour']),
+                    'display_footer' => isset($_POST['display_footer']) ? sanitize_text_field($_POST['display_footer']) : '',
                 );
 
                 $new_allagents_options['widgets'][$current_id] = array_merge( $current_allagents_options['widgets'][$current_id], $widget );
@@ -586,33 +578,113 @@ final class PH_AllAgents {
                 }
                 case "api":
                 {
+                    if ( !isset($widget['api_key']) || ( isset($widget['api_key']) && $widget['api_key'] == '' ) )
+                    {
+                        echo 'No API key entered';
+                        return ob_get_clean();
+                    }
+                    if ( !isset($widget['firm_link']) || ( isset($widget['firm_link']) && $widget['firm_link'] == '' ) )
+                    {
+                        echo 'No firm link entered';
+                        return ob_get_clean();
+                    }
+                    if ( $widget['show_reviews_for'] == 'branch' && ( !isset($widget['branch_link']) || ( isset($widget['branch_link']) && $widget['branch_link'] == '' ) ) )
+                    {
+                        echo 'No branch link entered';
+                        return ob_get_clean();
+                    }
+
+                    wp_enqueue_style('ph-allagents');
+                    if ( isset($widget['display']) && $widget['display'] == 'carousel' )
+                    {
+                        wp_enqueue_style('ph-allagents-slick');
+                        wp_enqueue_script('ph-allagents-slick');
+                        wp_enqueue_script('ph-allagents-slick-init');
+                    }
+
+                    $overall = isset($widget['overall']) && !empty($widget['overall']) ? $widget['overall'] : array();
+                    $rating = isset($overall->rating) ? $overall->rating : 0;
+                    $stars = isset($overall->rating) ? ceil($overall->rating) : 0;
+                    $votes = isset($overall->votes) ? ceil($overall->votes) : 0;
+                    $header_background_colour = isset($widget['header_background_colour']) && !empty($widget['header_background_colour']) ? $widget['header_background_colour'] : '';
+                    $show_reviews_for = $widget['show_reviews_for'];
+                    $firm_link = $widget['firm_link'];
+                    $branch_link = $widget['branch_link'];
+
+                    echo '<div class="allagents-widget">';
+
+                    if ( !isset($widget['display_header']) || ( isset($widget['display_header']) && $widget['display_header'] != '' ) )
+                    {
+                        $template = locate_template( array('propertyhive/allagents-header.php') );
+                        if ( !$template )
+                        {
+                            include( dirname( PH_ALLAGENTS_PLUGIN_FILE ) . '/templates/allagents-header.php' );
+                        }
+                        else
+                        {
+                            include( $template );
+                        }
+                    }
+
+                    $reviews = isset($widget['reviews']) && !empty($widget['reviews']) ? $widget['reviews'] : array();
+                    if ( isset($widget['number_reviews']) && !empty($widget['number_reviews']) )
+                    {
+                        $reviews = array_slice($reviews, 0, (int)$widget['number_reviews']);
+                    }
+                    else
+                    {
+                        $reviews = array_slice($reviews, 0, 20);
+                    }
+
+                    $template = locate_template( array('propertyhive/allagents-reviews.php') );
+                    if ( !$template )
+                    {
+                        include( dirname( PH_ALLAGENTS_PLUGIN_FILE ) . '/templates/allagents-reviews.php' );
+                    }
+                    else
+                    {
+                        include( $template );
+                    }
+
+                    if ( !isset($widget['display_footer']) || ( isset($widget['display_footer']) && $widget['display_footer'] != '' ) )
+                    {
+                        $template = locate_template( array('propertyhive/allagents-footer.php') );
+                        if ( !$template )
+                        {
+                            include( dirname( PH_ALLAGENTS_PLUGIN_FILE ) . '/templates/allagents-footer.php' );
+                        }
+                        else
+                        {
+                            include( $template );
+                        }
+                    }
+
+                    echo '</div>';
 
                     break;
                 }
             }
         }
 
-        /*$template = locate_template( array('propertyhive/allagents.php') );
-        if ( !$template )
-        {
-            include( dirname( PH_ALLAGENTS_PLUGIN_FILE ) . '/templates/allagents.php' );
-        }
-        else
-        {
-            include( $template );
-        }*/
-
         return ob_get_clean();
     }
 
-    /*public function load_allagents_scripts() {
+    public function load_allagents_scripts() {
 
         $assets_path = str_replace( array( 'http:', 'https:' ), '', untrailingslashit( plugins_url( '/', __FILE__ ) ) ) . '/assets/';
 
         wp_register_script( 
-            'ph-allagents', 
-            $assets_path . 'js/propertyhive-allagents.js', 
-            array(), 
+            'ph-allagents-slick', 
+            '//cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.min.js', 
+            array('jquery'), 
+            '1.8.1',
+            true
+        );
+
+        wp_register_script( 
+            'ph-allagents-slick-init', 
+            $assets_path . 'js/slick-init.js', 
+            array('jquery', 'ph-allagents-slick'), 
             PH_ALLAGENTS_VERSION,
             true
         );
@@ -623,12 +695,19 @@ final class PH_AllAgents {
         $assets_path = str_replace( array( 'http:', 'https:' ), '', untrailingslashit( plugins_url( '/', __FILE__ ) ) ) . '/assets/';
 
         wp_register_style( 
+            'ph-allagents-slick', 
+            '//cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.css', 
+            array(), 
+            '1.8.1'
+        );
+
+        wp_register_style( 
             'ph-allagents', 
             $assets_path . 'css/propertyhive-allagents.css', 
             array(), 
             PH_ALLAGENTS_VERSION
         );
-    }*/
+    }
 }
 
 endif;
