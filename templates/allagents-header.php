@@ -1,6 +1,6 @@
 <div class="allagents-header"<?php echo $header_background_colour != '' ? ' style="background-color:' . $header_background_colour . '"' : ''; ?>>
 
-	<a href="https://www.allagents.co.uk/<?php echo $firm_link; ?>/<?php if ( $branch_link != '' ) { echo $branch_link . '/'; } ?>" target="_blank"><img src="https://static.allagents.co.uk/img/allagents_logo_widget.png" class="allagents-logo"></a>
+	<a href="https://www.allagents.co.uk/<?php echo $firm_link; ?>/<?php if ( $branch_link != '' ) { echo $branch_link . '/'; } ?>" target="_blank"><img src="<?php echo $assets_path; ?>/images/allagents_logo.png" class="allagents-logo"></a>
 
 	<div class="allagents-stars">
 		<?php

@@ -834,6 +834,8 @@ final class PH_AllAgents {
 
                     if ( !isset($widget['display_header']) || ( isset($widget['display_header']) && $widget['display_header'] != '' ) )
                     {
+                        $assets_path = str_replace( array( 'http:', 'https:' ), '', untrailingslashit( plugins_url( '/', __FILE__ ) ) ) . '/assets/';
+
                         $template = locate_template( array('propertyhive/allagents-header.php') );
                         if ( !$template )
                         {
@@ -894,7 +896,7 @@ final class PH_AllAgents {
 
         wp_register_script( 
             'ph-allagents-slick', 
-            '//cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.min.js', 
+            $assets_path . 'js/slick.min.js', 
             array('jquery'), 
             '1.8.1',
             true
@@ -915,7 +917,7 @@ final class PH_AllAgents {
 
         wp_register_style( 
             'ph-allagents-slick', 
-            '//cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.css', 
+            $assets_path . 'css/slick.css', 
             array(), 
             '1.8.1'
         );
