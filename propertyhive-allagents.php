@@ -682,7 +682,15 @@ final class PH_AllAgents {
                 $widget = array(
                     'name' => sanitize_text_field($_POST['name']),
                     'integration_type' => isset($_POST['integration_type']) && in_array($_POST['integration_type'], array('widget', 'api')) ? sanitize_text_field($_POST['integration_type']) : 'widget',
-                    'widget_code' => $_POST['widget_code'],
+                    'widget_code' => wp_kses($_POST['widget_code'], array(
+                        'div' => array(
+                            'id' => array(),
+                        ),
+                        'script' => array(
+                            'type' => array(),
+                            'src' => array(),
+                        ),
+                    )),
                     'api_key' => sanitize_text_field($_POST['api_key']),
                     'show_reviews_for' => isset($_POST['show_reviews_for']) && in_array($_POST['show_reviews_for'], array('firm', 'branch')) ? sanitize_text_field($_POST['show_reviews_for']) : 'firm',
                     'firm_link' => sanitize_text_field($_POST['firm_link']),
@@ -690,7 +698,7 @@ final class PH_AllAgents {
                     'number_reviews' => (int)$_POST['number_reviews'],
                     'display' => isset($_POST['display']) && in_array($_POST['display'], array('list', 'carousel')) ? sanitize_text_field($_POST['display']) : 'list',
                     'display_header' => isset($_POST['display_header']) ? sanitize_text_field($_POST['display_header']) : '',
-                    'header_background_colour' => sanitize_text_field($_POST['header_background_colour']),
+                    'header_background_colour' => sanitize_hex_color($_POST['header_background_colour']),
                     'display_footer' => isset($_POST['display_footer']) ? sanitize_text_field($_POST['display_footer']) : '',
                 );
 
@@ -712,7 +720,15 @@ final class PH_AllAgents {
                 $widget = array(
                     'name' => sanitize_text_field($_POST['name']),
                     'integration_type' => isset($_POST['integration_type']) && in_array($_POST['integration_type'], array('widget', 'api')) ? sanitize_text_field($_POST['integration_type']) : 'widget',
-                    'widget_code' => $_POST['widget_code'],
+                    'widget_code' => wp_kses($_POST['widget_code'], array(
+                        'div' => array(
+                            'id' => array(),
+                        ),
+                        'script' => array(
+                            'type' => array(),
+                            'src' => array(),
+                        ),
+                    )),
                     'api_key' => sanitize_text_field($_POST['api_key']),
                     'show_reviews_for' => isset($_POST['show_reviews_for']) && in_array($_POST['show_reviews_for'], array('firm', 'branch')) ? sanitize_text_field($_POST['show_reviews_for']) : 'firm',
                     'firm_link' => sanitize_text_field($_POST['firm_link']),
@@ -720,7 +736,7 @@ final class PH_AllAgents {
                     'number_reviews' => (int)$_POST['number_reviews'],
                     'display' => isset($_POST['display']) && in_array($_POST['display'], array('list', 'carousel')) ? sanitize_text_field($_POST['display']) : 'list',
                     'display_header' => isset($_POST['display_header']) ? sanitize_text_field($_POST['display_header']) : '',
-                    'header_background_colour' => sanitize_text_field($_POST['header_background_colour']),
+                    'header_background_colour' => sanitize_hex_color($_POST['header_background_colour']),
                     'display_footer' => isset($_POST['display_footer']) ? sanitize_text_field($_POST['display_footer']) : '',
                 );
 
