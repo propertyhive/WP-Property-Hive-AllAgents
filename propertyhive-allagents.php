@@ -203,6 +203,7 @@ final class PH_AllAgents {
                             <label for="' . esc_attr($setting['id']) . '">' . $setting['title'] . '</label>
                         </th>
                         <td class="forminp forminp-text">
+                            ' . $description . ($description != '' ? '<br>' : '') . '
                             <textarea
                                 style="width:100%; max-width:480px; height:105px;"
                                 name="' . esc_attr($setting['id']) . '"
