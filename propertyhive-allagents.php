@@ -585,7 +585,7 @@ final class PH_AllAgents {
             'title'     => __( 'Header Background Colour', 'propertyhive' ),
             'id'        => 'header_background_colour',
             'type'      => 'color',
-            'default'   => isset($widget_details['color'])? $widget_details['color'] : '#0d47a1',
+            'default'   => isset($widget_details['header_background_colour'])? $widget_details['header_background_colour'] : '#0d47a1',
         );
 
         $settings[] = array(
