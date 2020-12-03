@@ -3,7 +3,7 @@
  * Plugin Name: Property Hive AllAgents Review Embed
  * Plugin Uri: http://wp-property-hive.com/addons/allagents/
  * Description: Quickly and easily display ratings and reviews from AllAgents, plus customisation options
- * Version: 1.0.1
+ * Version: 1.0.2
  * Author: PropertyHive
  * Author URI: http://wp-property-hive.com
  */
@@ -17,7 +17,7 @@ final class PH_AllAgents {
     /**
      * @var string
      */
-    public $version = '1.0.1';
+    public $version = '1.0.2';
 
     /**
      * @var Property Hive The single instance of the class
