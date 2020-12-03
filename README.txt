@@ -48,6 +48,7 @@ This plugin is in no way associated with AllAgents and all output is achieved th
 2. Settings allow you to choose if you want to use pre-built widgets provided by AllAgents
 3. Alternatively we can integrate with their API whereby you can choose and customise the layout
 4. Reviews output in a list or carousel
+5. Create unlimited widgets, one per branch for example
 
 == Changelog ==
 
